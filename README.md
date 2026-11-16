@@ -21,10 +21,11 @@ node bench/bench.mjs
 | Random fuzz (2000 inputs: random construction + spec mutations) | 1781 / 2000 |
 
 The gate is 720/720: speed only counts once every case matches marked
-exactly. The residual fuzz mismatches (219/2000) are all adversarial
-random line-soup — lines from unrelated documents stitched together into
-nested list + blockquote + code-merge pileups that coherent documents do
-not produce. All 240 coherent documents tested (practice + 5 generated
+exactly. The residual fuzz mismatches (219/2000) come from adversarial inputs —
+random line-soup (lines from unrelated documents stitched together into
+nested list + blockquote + code-merge pileups) and small mutations of
+real examples — which the generator's coherent documents do not produce
+as-is. All 240 coherent documents tested (practice + 5 generated
 sets) pass with zero mismatches.
 
 A dependency-free ES module: `parse.js` exports a single function
@@ -165,7 +166,8 @@ suites below:
 4. **Fuzzing** — 2000 seeded inputs (1000 random constructions from
    spec/practice lines + 1000 mutations of spec examples), compared
    against `marked.parse`: 1781 pass. Remaining mismatches are
-   adversarial random-soup combinations; see the Correctness section.
+   adversarial combinations — random line-soup and small mutations of
+   real examples; see the Correctness section.
 
 ## Trade-offs
 
