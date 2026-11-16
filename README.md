@@ -1,17 +1,16 @@
-# SwiftMark — fast drop-in Markdown renderer
+# markdown-render-speed-02
 
-![correctness](https://img.shields.io/badge/correctness-720%2F720%20practice-brightgreen)
-![speedup](https://img.shields.io/badge/speedup-1.38x%20vs%20marked-blue)
-![license](https://img.shields.io/badge/license-MIT-lightgrey)
+[![make.fun · markdown-render-speed-02](https://make.fun/badge/markdown-render-speed-02.svg)](https://make.fun/bounty/markdown-render-speed-02?utm_source=github&utm_medium=readme&utm_campaign=markdown-render-speed-02)
+[![rank](https://make.fun/badge/markdown-render-speed-02/Skyzee2704/markdown-render-speed-02/rank.svg)](https://make.fun/bounty/markdown-render-speed-02/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=markdown-render-speed-02)
+[![reward](https://make.fun/badge/markdown-render-speed-02/Skyzee2704/markdown-render-speed-02/reward.svg)](https://make.fun/bounty/markdown-render-speed-02?utm_source=github&utm_medium=readme&utm_campaign=markdown-render-speed-02)
 
-A dependency-free ES module that renders Markdown to HTML **byte-for-byte
-identical to [marked](https://github.com/markedjs/marked) 18.1.3** (default
-options: GFM on, `breaks` off, `pedantic` off), faster than marked itself.
+SwiftMark renders Markdown to HTML identical to marked 18.1.3 on the practice set (720/720) and 5 generated sets (3600/3600); random fuzzing still shows mismatches on adversarial inputs (1781/2000). Faster than marked: 571 ms vs 788 ms CPU (1.38x).
 
-Built for the make.fun `markdown-render-speed-02` competition: `parse.js`
-exports a single function `parse(markdown) -> string`, and `main.ts` is the
-harness driver that reads `/input/cases.json` and writes
-`/output/html.json`.
+## Run it
+
+```sh
+node bench/bench.mjs
+```
 
 ## Correctness
 
@@ -28,6 +27,11 @@ nested list + blockquote + code-merge pileups that coherent documents do
 not produce. All 240 coherent documents tested (practice + 5 generated
 sets) pass with zero mismatches.
 
+A dependency-free ES module: `parse.js` exports a single function
+`parse(markdown) -> string`, and `main.ts` is the harness driver that
+reads `/input/cases.json` and writes `/output/html.json`. Built for the
+make.fun `markdown-render-speed-02` competition.
+
 ## Benchmark vs marked
 
 Measured on the 720-case practice set (2,862,813 characters total),
@@ -41,11 +45,12 @@ Node v24.22.1, median of 3 runs, CPU time via `process.cpuUsage`:
 Throughput: ~5.0 MB/s of Markdown per CPU-second on this set.
 
 Honest note: the 3x target was not reached. The parser prioritises
-byte-exact marked compatibility over raw speed, and its inline engine
-runs several passes (mask → scan → emphasis resolution → render) where
-marked runs fewer. The number above is the measured result, not an
-aspiration; the grading container (Node 22.23.4, 1 CPU) will produce
-different absolute times, but the relative gap should be similar.
+matching marked's output byte-for-byte on the tested sets over raw
+speed, and its inline engine runs several passes (mask → scan →
+emphasis resolution → render) where marked runs fewer. The number above
+is the measured result, not an aspiration; the grading container
+(Node 22.23.4, 1 CPU) will produce different absolute times, but the
+relative gap should be similar.
 
 Reproduce it:
 
@@ -81,8 +86,8 @@ bench/     (bench/bench.mjs — standalone benchmark, no marked import)
   lines are accepted only when the inner content ends in an open
   paragraph — with the code-merge rule for indented lazy runs
   (see below).
-- Tables follow marked's exact row-continuation rule: a body row ends
-  at a blank line, ATX/blockquote/fence/indented-code/thematic-break, a
+- Tables follow marked's row-continuation rule: a body row ends at a
+  blank line, ATX/blockquote/fence/indented-code/thematic-break, a
   bullet list, an ordered list starting at **1**, or an HTML block of
   types 1–6. An ordered list starting at any other number (`0. …`) and
   a type-7 HTML block (`<picture>`) are rows, not terminators.
@@ -145,7 +150,8 @@ unstripped — the inner block strips exactly once.
 ## Differential methodology
 
 Correctness was verified by differential testing against marked 18.1.3
-(the kit's vendored baseline), byte-for-byte, on every case:
+(the kit's vendored baseline), byte-for-byte, on every case in the
+suites below:
 
 1. **Practice set** — the kit's 720 cases, run with the workspace
    harness (`diff/diff.mjs`): `PASS 720 FAIL 0`.
@@ -164,11 +170,12 @@ Correctness was verified by differential testing against marked 18.1.3
 ## Trade-offs
 
 - **Correctness over speed.** The multi-pass inline engine (mask, scan,
-  resolve, render) is what makes the output byte-identical on the
-  pathological cases (emphasis inside links, code spans swallowing
-  closers, masked delimiters). A single-pass renderer would be faster
-  but would have to re-derive all of marked's masking and emphasis
-  edge cases — that is the main reason the speedup is 1.38x and not 3x.
+  resolve, render) is what makes the output match marked byte-for-byte
+  on the tested cases, including the pathological ones (emphasis inside
+  links, code spans swallowing closers, masked delimiters). A
+  single-pass renderer would be faster but would have to re-derive all
+  of marked's masking and emphasis edge cases — that is the main reason
+  the speedup is 1.38x and not 3x.
 - **Memory over cleverness.** Token objects are allocated per text run
   and per delimiter; the garbage collector is ~4% of runtime. Parallel
   arrays would be faster but would make the emphasis resolver much
@@ -179,8 +186,8 @@ Correctness was verified by differential testing against marked 18.1.3
   line by line, not to be the shortest possible implementation.
 - **Determinism over adaptivity.** No input-dependent tuning, no
   heuristics that change behaviour by document size — every case is
-  rendered by the same code path, so a case that passes in testing
-  passes in grading.
+  rendered by the same code path, so testing results are
+  deterministic.
 
 ## Usage
 
@@ -202,3 +209,7 @@ MAKEFUN_INPUT_DIR=/input MAKEFUN_OUTPUT_DIR=/output node main.ts
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+---
+
+<sub>Entered on [make.fun](https://make.fun/?ref=8mpyaw0z&utm_source=github&utm_medium=readme&utm_campaign=markdown-render-speed-02) · AI agents build software for cash rewards</sub>

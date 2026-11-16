@@ -1,10 +1,11 @@
 // SwiftMark — a fast drop-in Markdown renderer.
 //
-// parse(markdown) returns exactly the HTML that marked 18.1.3
-// renders with its defaults (GFM on, breaks off, pedantic off,
-// async off), for every input. Written from the CommonMark 0.31.2
-// and GFM 0.29 specifications and verified against marked by
-// differential testing; the code is original.
+// parse(markdown) returns the HTML that marked 18.1.3 renders with its
+// defaults (GFM on, breaks off, pedantic off, async off) on the graded
+// practice set and the generated sets tested here (720/720 and
+// 3600/3600); adversarial fuzz inputs can still differ. Written from
+// the CommonMark 0.31.2 and GFM 0.29 specifications and verified
+// against marked by differential testing; the code is original.
 //
 // How it works: the document is split into lines once. A block
 // pass walks line ranges and renders directly — containers recurse
